@@ -6,6 +6,7 @@
 #include <chrono>
 #include <iostream>
 #include <ratio>
+#include <functional>
 
 #include "StopWatch.h"
 
@@ -58,6 +59,17 @@ QBRecordCollection QBFindMatchingRecords (
     return result;
 }
 
+auto findByFunction(const QBRecordCollection & data, std::function<bool(const QBRecord & rec)> fn) 
+{
+    QBRecordCollection results;
+
+    std::copy_if(std::begin(data), std::end(data), std::back_inserter(results), [&fn](const QBRecord & rec) {
+        return fn(rec);
+    });
+
+    return results;
+}
+
 /**
     Utility to populate a record collection
     prefix - prefix for the string value for every record
@@ -84,21 +96,77 @@ QBRecordCollection populateDummyData(const std::string & prefix, uint numRecords
     return data;
 }
 
+auto findColumn0(const QBRecordCollection & data, uint value)
+{
+    return findByFunction(data, [value](const QBRecord & rec){
+        return rec.column0 == value;
+    });
+}
+
+auto findColumn1(const QBRecordCollection & data, std::string_view value)
+{
+    return findByFunction(data, [value](const QBRecord & rec){
+        return rec.column1.find(value) != std::string::npos;
+    });
+}
+
+auto findColumn2(const QBRecordCollection & data, long value)
+{
+    return findByFunction(data, [value](const QBRecord & rec){
+        return rec.column2 == value;
+    });
+}
+
+auto findColumn3(const QBRecordCollection & data, std::string_view value)
+{
+    return findByFunction(data, [value](const QBRecord & rec){
+        return rec.column3.find(value) != std::string::npos;
+    });
+}
+
 bool validateFind(const QBRecordCollection & data)
 {
     {
-        auto name = "find string in column1";
-        auto found = QBFindMatchingRecords(data, "column1", "testdata500");
+        auto name = "find number in column2";
+        auto found = QBFindMatchingRecords(data, "column2", "24");
+        if (found.size() != 1000) {
+            std::cerr << "validation failed: " << name << " expected '1,000' record, found '" << found.size() << "' records\n";
+            return false;
+        }
+    }
+    {
+        auto name = "find string with findColumn0";
+        auto found = findColumn0(data, 3465);
+
+        if (found.size() != 1) {
+            std::cerr << "validation failed: " << name << " expected '1' record, found '" << found.size() << "' records\n";
+            return false;
+        }
+    }
+    {
+        auto name = "find string with findColumn1";
+        auto found = findColumn1(data, "testdata500");
+
         if (found.size() != 111) {
             std::cerr << "validation failed: " << name << " expected '111' record, found '" << found.size() << "' records\n";
             return false;
         }
     }
     {
-        auto name = "find number in column2";
-        auto found = QBFindMatchingRecords(data, "column2", "24");
+        auto name = "find number with findColumn2";
+        auto found = findColumn2(data, 24);
+
         if (found.size() != 1000) {
             std::cerr << "validation failed: " << name << " expected '1,000' record, found '" << found.size() << "' records\n";
+            return false;
+        }
+    }
+    {
+        auto name = "find string with findColumn3";
+        auto found = findColumn3(data, "500testdata");
+
+        if (found.size() != 100) {
+            std::cerr << "validation failed: " << name << " expected '100' record, found '" << found.size() << "' records\n";
             return false;
         }
     }
