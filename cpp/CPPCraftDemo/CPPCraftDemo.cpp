@@ -64,13 +64,13 @@ QBRecordCollection QBFindMatchingRecords (
     prefix - prefix for the string value for every record
     numRecords - number of records to populate in the collection
 */
-QBRecordCollection populateDummyData(const std::string & prefix, int numRecords)
+QBRecordCollection populateDummyData(const std::string & prefix, uint numRecords)
 {
     QBRecordCollection data;
     
     data.reserve(numRecords);
 
-    for (auto i = 0; i < numRecords; ++i) {
+    for (auto i = 0u; i < numRecords; ++i) {
         QBRecord rec = { i, prefix + std::to_string (i), i % 100,
         std::to_string (i) + prefix };
         
@@ -85,27 +85,17 @@ QBRecordCollection populateDummyData(const std::string & prefix, int numRecords)
 
 int main ()
 {
-    using namespace std::chrono;
-    
-    
-    // populate a bunch of data
+    const int LOOP_COUNT = 1000;
     auto data = populateDummyData("testdata", 1000);
-  // Find a record that contains and measure the perf
- 
     auto stopWatch = StopWatch{};
     
-    // auto startTimer = steady_clock::now();
+    for (auto idx = 0; idx < LOOP_COUNT; ++idx) {
+        auto filteredSet = QBFindMatchingRecords(data, "column1", "testdata500");
+        auto filteredSet2 = QBFindMatchingRecords(data, "column2", "24");
+    }
     
-    auto filteredSet = QBFindMatchingRecords (data, "column1", "testdata500");
-    auto filteredSet2 = QBFindMatchingRecords (data, "column2", "24");
+    std::cout << "total duration: " << std::fixed << stopWatch.seconds() << "s\n";
+    std::cout << "lookup duration: " << std::fixed << stopWatch.duration<std::chrono::microseconds>().count() / double(LOOP_COUNT) << "µs\n";
     
-    // std::cout << "profiler: " << double((steady_clock::now () - startTimer).count ()) * steady_clock::period::num / steady_clock::period::den << std::endl;
-    std::cout << "duration: " << std::fixed << stopWatch.seconds() << "s\n";
-    
-    
-
-    // make sure that the function is correct
-    assert (filteredSet.size () == 1);
-  
     return 0;
 }
