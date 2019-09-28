@@ -31,35 +31,38 @@ using QBRecordCollection = std::vector<QBRecord>;
     matchString - the string to search for
 */
 
-QBRecordCollection QBFindMatchingRecords (
-    const QBRecordCollection & records,
-	const std::string & columnName,
-	const std::string & matchString)
-{
-    QBRecordCollection result;
+// QBRecordCollection QBFindMatchingRecords (
+//     const QBRecordCollection & records,
+// 	const std::string & columnName,
+// 	const std::string & matchString)
+// {
+//     QBRecordCollection result;
 
-    std::copy_if(records.begin(), records.end(), std::back_inserter(result), [columnName, matchString](QBRecord rec) {
+//     std::copy_if(records.begin(), records.end(), std::back_inserter(result), [columnName, matchString](QBRecord rec) {
 		
-		if (columnName == "column0") {
-            uint matchValue = std::stoul (matchString);
-            return matchValue == rec.column0;
-		} else if (columnName == "column1") {
-            return rec.column1.find(matchString) != std::string::npos;
+// 		if (columnName == "column0") {
+//             uint matchValue = std::stoul (matchString);
+//             return matchValue == rec.column0;
+// 		} else if (columnName == "column1") {
+//             return rec.column1.find(matchString) != std::string::npos;
             
-		} else if (columnName == "column2") {
-            long matchValue = std::stol (matchString);
-            return matchValue == rec.column2;
-		} else if (columnName == "column3"){
-            return rec.column3.find (matchString) != std::string::npos;
-		} else {
-            return false;
-		}
-    });
+// 		} else if (columnName == "column2") {
+//             long matchValue = std::stol (matchString);
+//             return matchValue == rec.column2;
+// 		} else if (columnName == "column3"){
+//             return rec.column3.find (matchString) != std::string::npos;
+// 		} else {
+//             return false;
+// 		}
+//     });
 
-    return result;
-}
+//     return result;
+// }
 
-auto findByFunction(const QBRecordCollection & data, std::function<bool(const QBRecord & rec)> fn) 
+
+
+template<typename LAMBDA>
+auto findByFunction(const QBRecordCollection & data, LAMBDA fn) 
 {
     QBRecordCollection results;
 
@@ -82,14 +85,12 @@ QBRecordCollection populateDummyData(const std::string & prefix, uint numRecords
     data.reserve(numRecords);
 
     for (auto i = 0u; i < numRecords; ++i) {
-        QBRecord rec = { 
+        data.emplace_back(QBRecord{ 
             i, 
             prefix + std::to_string(i), 
             i % 100, 
             std::to_string(i) + prefix 
-        };
-        
-        data.emplace_back(rec);
+        });
     }
 
     std::cout << "finished generating test data\n";
@@ -126,14 +127,6 @@ auto findColumn3(const QBRecordCollection & data, std::string_view value)
 
 bool validateFind(const QBRecordCollection & data)
 {
-    {
-        auto name = "find number in column2";
-        auto found = QBFindMatchingRecords(data, "column2", "24");
-        if (found.size() != 1000) {
-            std::cerr << "validation failed: " << name << " expected '1,000' record, found '" << found.size() << "' records\n";
-            return false;
-        }
-    }
     {
         auto name = "find string with findColumn0";
         auto found = findColumn0(data, 3465);
@@ -189,8 +182,8 @@ int main ()
     auto stopWatch = StopWatch{};
 
     for (auto idx = 0; idx < LOOP_COUNT; ++idx) {
-        auto filteredSet = QBFindMatchingRecords(data, "column1", "testdata500");
-        auto filteredSet2 = QBFindMatchingRecords(data, "column2", "24");
+        auto filteredSet = findColumn1(data, "testdata500");
+        auto filteredSet2 = findColumn2(data, 24);
     }
 
     stopWatch.stop();
