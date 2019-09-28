@@ -1,5 +1,4 @@
 #include <stdio.h>
-// #include <tchar.h>
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -85,16 +84,16 @@ bool validateFind(const QBRecordCollection & data)
     {
         auto name = "find string in column1";
         auto found = QBFindMatchingRecords(data, "column1", "testdata500");
-        if (found.size() != 1) {
-            std::cerr << "validation failed: " << name << " expected '1' record, found '" << found.size() << "' records\n";
+        if (found.size() != 1111) {
+            std::cerr << "validation failed: " << name << " expected '1,111' record, found '" << found.size() << "' records\n";
             return false;
         }
     }
     {
         auto name = "find number in column2";
         auto found = QBFindMatchingRecords(data, "column2", "24");
-        if (found.size() != 10) {
-            std::cerr << "validation failed: " << name << " expected '10' record, found '" << found.size() << "' records\n";
+        if (found.size() != 10'000) {
+            std::cerr << "validation failed: " << name << " expected '10,000' record, found '" << found.size() << "' records\n";
             return false;
         }
     }
@@ -105,7 +104,7 @@ bool validateFind(const QBRecordCollection & data)
 
 int main ()
 {
-    const uint RECORD_COUNT = 1000;
+    const uint RECORD_COUNT = 1'000'000;
     auto data = populateDummyData("testdata", RECORD_COUNT);
 
     if (!validateFind(data)) {
