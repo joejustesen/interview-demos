@@ -80,19 +80,50 @@ QBRecordCollection populateDummyData(const std::string & prefix, uint numRecords
     return data;
 }
 
-// create set of tests to validate the implementation first
+bool validateFind(const QBRecordCollection & data)
+{
+    {
+        auto name = "find string in column1";
+        auto found = QBFindMatchingRecords(data, "column1", "testdata500");
+        if (found.size() != 1) {
+            std::cerr << "validation failed: " << name << " expected '1' record, found '" << found.size() << "' records\n";
+            return false;
+        }
+    }
+    {
+        auto name = "find number in column2";
+        auto found = QBFindMatchingRecords(data, "column2", "24");
+        if (found.size() != 10) {
+            std::cerr << "validation failed: " << name << " expected '10' record, found '" << found.size() << "' records\n";
+            return false;
+        }
+    }
+
+    return true;
+}
 
 
 int main ()
 {
+    const uint RECORD_COUNT = 1000;
+    auto data = populateDummyData("testdata", RECORD_COUNT);
+
+    if (!validateFind(data)) {
+        return 1;
+    }
+
     const int LOOP_COUNT = 1000;
-    auto data = populateDummyData("testdata", 1000);
     auto stopWatch = StopWatch{};
-    
+
     for (auto idx = 0; idx < LOOP_COUNT; ++idx) {
         auto filteredSet = QBFindMatchingRecords(data, "column1", "testdata500");
         auto filteredSet2 = QBFindMatchingRecords(data, "column2", "24");
     }
+
+    std::cout << "size of record: " << sizeof(QBRecord) << " bytes\n";
+    std::cout << "number of records: " << RECORD_COUNT << "\n";
+    std::cout << "size of collection: " << sizeof(QBRecord) * data.size() << " bytes\n";
+    std::cout << "loop counts: " << LOOP_COUNT << "\n\n";
     
     std::cout << "total duration: " << std::fixed << stopWatch.seconds() << "s\n";
     std::cout << "lookup duration: " << std::fixed << stopWatch.duration<std::chrono::microseconds>().count() / double(LOOP_COUNT) << "µs\n";
