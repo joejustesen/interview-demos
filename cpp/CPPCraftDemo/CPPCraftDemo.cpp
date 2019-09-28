@@ -65,17 +65,22 @@ QBRecordCollection QBFindMatchingRecords (
 */
 QBRecordCollection populateDummyData(const std::string & prefix, uint numRecords)
 {
-    QBRecordCollection data;
-    
+    std::cout << "generating test data, prefix = '" << prefix << "', record count = " << numRecords << "\n";
+    auto data = QBRecordCollection{};
     data.reserve(numRecords);
 
     for (auto i = 0u; i < numRecords; ++i) {
-        QBRecord rec = { i, prefix + std::to_string (i), i % 100,
-        std::to_string (i) + prefix };
+        QBRecord rec = { 
+            i, 
+            prefix + std::to_string(i), 
+            i % 100, 
+            std::to_string(i) + prefix 
+        };
         
         data.emplace_back(rec);
     }
 
+    std::cout << "finished generating test data\n";
     return data;
 }
 
@@ -84,16 +89,16 @@ bool validateFind(const QBRecordCollection & data)
     {
         auto name = "find string in column1";
         auto found = QBFindMatchingRecords(data, "column1", "testdata500");
-        if (found.size() != 1111) {
-            std::cerr << "validation failed: " << name << " expected '1,111' record, found '" << found.size() << "' records\n";
+        if (found.size() != 111) {
+            std::cerr << "validation failed: " << name << " expected '111' record, found '" << found.size() << "' records\n";
             return false;
         }
     }
     {
         auto name = "find number in column2";
         auto found = QBFindMatchingRecords(data, "column2", "24");
-        if (found.size() != 10'000) {
-            std::cerr << "validation failed: " << name << " expected '10,000' record, found '" << found.size() << "' records\n";
+        if (found.size() != 1000) {
+            std::cerr << "validation failed: " << name << " expected '1,000' record, found '" << found.size() << "' records\n";
             return false;
         }
     }
@@ -104,13 +109,14 @@ bool validateFind(const QBRecordCollection & data)
 
 int main ()
 {
-    const uint RECORD_COUNT = 1'000'000;
+    const uint RECORD_COUNT = 100'000;
     auto data = populateDummyData("testdata", RECORD_COUNT);
 
     if (!validateFind(data)) {
         return 1;
     }
 
+    std::cout << "starting performance test\n";
     const int LOOP_COUNT = 1000;
     auto stopWatch = StopWatch{};
 
@@ -118,6 +124,9 @@ int main ()
         auto filteredSet = QBFindMatchingRecords(data, "column1", "testdata500");
         auto filteredSet2 = QBFindMatchingRecords(data, "column2", "24");
     }
+
+    stopWatch.stop();
+    std::cout << "finished performance test\n\n";
 
     std::cout << "size of record: " << sizeof(QBRecord) << " bytes\n";
     std::cout << "number of records: " << RECORD_COUNT << "\n";
