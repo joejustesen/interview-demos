@@ -12,6 +12,12 @@ InMemoryIndex::InMemoryIndex() :
 {
 }
 
+
+InMemoryIndex::InMemoryIndex(InMemoryIndex && other) : d_head{std::move(other.d_head)}
+{
+}
+
+
 /****************************************************************************
  * Insert a string into the Trie
 ****************************************************************************/
@@ -52,7 +58,7 @@ void pushLeavesOntoStack(const M & map, S & stack, FN fn) {
  * Return all indicies for the current leave and all leaves below the 
  * current leaf in the tree.
 ****************************************************************************/
-Indices InMemoryIndex::allLeaves(Trie * ptr)
+Indices InMemoryIndex::allLeaves(Trie * ptr) const
 {
     auto indices = Indices{};
     auto nodes = std::stack<Trie *, std::vector<Trie *>>{};
@@ -83,7 +89,7 @@ Indices InMemoryIndex::allLeaves(Trie * ptr)
 /****************************************************************************
  * Return a list of indies that match the string.
 ****************************************************************************/
-auto InMemoryIndex::search(const char* str)
+std::tuple<bool, Indices> InMemoryIndex::search(const char* str) const
 {
 	Trie * ptr = d_head.get();
 

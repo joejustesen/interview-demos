@@ -75,16 +75,29 @@ auto findRecords(const QBRecordCollection & data, LAMBDA fn)
     return results;
 }
 
-/**
-    Utility to populate a record collection
-    prefix - prefix for the string value for every record
-    numRecords - number of records to populate in the collection
-*/
 
+/****************************************************************************
+ *  Generate an index for column1
+****************************************************************************/
+InMemoryIndex createIndex(const QBRecordCollection & data)
+{
+    auto index = InMemoryIndex{};
+
+    for (const auto & record : data) {
+        index.insert(record.column1.c_str(), record.column0);
+    }
+
+    return index;
+}
+
+
+/****************************************************************************
+ * Create test data
+ *  prefix: prefix for the string value for every record
+ *  numRecords: number of records to populate in the collection
+****************************************************************************/
 QBRecordCollection populateDummyData(const std::string & prefix, uint numRecords)
 {
-    auto column1Index = InMemoryIndex{};
-
     std::cout << "generating test data, prefix = '" << prefix << "', record count = " << numRecords << "\n";
     auto data = QBRecordCollection{};
     data.reserve(numRecords);
@@ -97,7 +110,6 @@ QBRecordCollection populateDummyData(const std::string & prefix, uint numRecords
             std::to_string(i) + prefix 
         };
 
-        column1Index.insert(record.column1.c_str(), i);
         data.emplace_back(record);
     }
 
@@ -105,6 +117,24 @@ QBRecordCollection populateDummyData(const std::string & prefix, uint numRecords
     return data;
 }
 
+
+/****************************************************************************
+****************************************************************************/
+auto indicesToRecords(const QBRecordCollection & data, const Indices & indices)
+{
+    QBRecordCollection results;
+
+    std::transform(std::begin(indices), std::end(indices), std::back_inserter(results), 
+        [&data](auto index) {
+            return data[index];
+        });
+
+    return results;
+}
+
+
+/****************************************************************************
+****************************************************************************/
 auto findColumn0(const QBRecordCollection & data, uint value)
 {
     assert(value < data.size());
@@ -114,13 +144,24 @@ auto findColumn0(const QBRecordCollection & data, uint value)
     return results;
 }
 
-auto findColumn1(const QBRecordCollection & data, std::string_view value)
+
+/****************************************************************************
+****************************************************************************/
+auto findColumn1(const QBRecordCollection & data, std::string_view value, const InMemoryIndex * index = nullptr)
 {
-    return findRecords(data, [value](const QBRecord & rec){
-        return rec.column1.find(value) != std::string::npos;
-    });
+    if (index) {
+        auto [found, indices] = index->search(std::string(value).c_str());
+        return indicesToRecords(data, indices);
+    } else {
+        return findRecords(data, [value](const QBRecord & rec){
+            return rec.column1.find(value) != std::string::npos;
+        });
+    }
 }
 
+
+/****************************************************************************
+****************************************************************************/
 auto findColumn2(const QBRecordCollection & data, long value)
 {
     return findRecords(data, [value](const QBRecord & rec){
@@ -128,6 +169,9 @@ auto findColumn2(const QBRecordCollection & data, long value)
     });
 }
 
+
+/****************************************************************************
+****************************************************************************/
 auto findColumn3(const QBRecordCollection & data, std::string_view value)
 {
     return findRecords(data, [value](const QBRecord & rec){
@@ -135,7 +179,10 @@ auto findColumn3(const QBRecordCollection & data, std::string_view value)
     });
 }
 
-bool validateFind(const QBRecordCollection & data)
+
+/****************************************************************************
+****************************************************************************/
+bool validateFind(const QBRecordCollection & data, const InMemoryIndex & index)
 {
     std::cout << "validating findRecord function\n";
 
@@ -150,7 +197,7 @@ bool validateFind(const QBRecordCollection & data)
     }
     {
         auto name = "find string with findColumn1";
-        auto found = findColumn1(data, "testdata500");
+        auto found = findColumn1(data, "testdata500", &index);
 
         if (found.size() != 111) {
             std::cerr << "validation failed: " << name << " expected '111' record, found '" << found.size() << "' records\n";
@@ -176,18 +223,22 @@ bool validateFind(const QBRecordCollection & data)
         }
     }
 
-    return true;
+    return true;    validateTrie();
+
 }
 
 
+/****************************************************************************
+****************************************************************************/
 int main ()
 {
-    const uint RECORD_COUNT = 100'000;
-    auto data = populateDummyData("testdata", RECORD_COUNT);
-
     validateTrie();
 
-    if (!validateFind(data)) {
+    const uint RECORD_COUNT = 100'000;
+    const auto data = populateDummyData("testdata", RECORD_COUNT);
+    const auto index = createIndex(data);
+
+    if (!validateFind(data, index)) {
         return 1;
     }
 
@@ -196,7 +247,7 @@ int main ()
     auto stopWatch = StopWatch{};
 
     for (auto idx = 0; idx < LOOP_COUNT; ++idx) {
-        auto filteredSet = findColumn1(data, "testdata500");
+        auto filteredSet = findColumn1(data, "testdata500", &index);
         auto filteredSet2 = findColumn2(data, 24);
     }
 

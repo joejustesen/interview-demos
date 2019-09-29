@@ -16,13 +16,14 @@ class InMemoryIndex {
     };
 
     std::unique_ptr<Trie> d_head;
-    Indices allLeaves(Trie * ptr);
+    Indices allLeaves(Trie * ptr) const;
 
 public:
     InMemoryIndex();
+    InMemoryIndex(InMemoryIndex && other);
 
     void insert(const char * str, uint index);
-    auto search(const char * str);
+    std::tuple<bool, Indices> search(const char * str) const;
 };
 
 void validateTrie(); 
