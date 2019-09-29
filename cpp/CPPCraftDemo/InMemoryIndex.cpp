@@ -1,4 +1,4 @@
-#include "TrieIndex.h"
+#include "InMemoryIndex.h"
 #include <stack>
 #include <algorithm>
 #include <iostream>

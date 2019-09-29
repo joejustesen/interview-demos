@@ -9,7 +9,7 @@
 #include <functional>
 
 #include "StopWatch.h"
-#include "TrieIndex.h"
+#include "InMemoryIndex.h"
 
 /**
     Represents a Record Object

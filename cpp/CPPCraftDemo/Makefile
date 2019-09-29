@@ -6,8 +6,8 @@ DEBUG_CPPFLAGS = -g -Wall -Wextra -Wpedantic -std=gnu++2a
 
   # the build target executable:
 TARGET = demo
-FILES = CPPCraftDemo.cpp TrieIndex.cpp
-HEADERS = TrieIndex.h StopWatch.h
+FILES = CPPCraftDemo.cpp InMemoryIndex.cpp
+HEADERS = InMemoryIndex.h StopWatch.h
 
 all: $(TARGET)
 
