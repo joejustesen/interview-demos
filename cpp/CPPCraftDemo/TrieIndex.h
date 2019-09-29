@@ -25,4 +25,4 @@ public:
     auto search(const char * str);
 };
 
-void validateTrie();
+void validateTrie(); 
