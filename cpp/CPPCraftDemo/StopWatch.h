@@ -19,7 +19,7 @@ public:
     }
 
     double seconds() const {
-        return duration<std::chrono::nanoseconds>().count() / 1'000'000'000.0;
+        return double(duration<std::chrono::nanoseconds>().count()) / 1'000'000'000.0;
     }
     
     inline void stop() {

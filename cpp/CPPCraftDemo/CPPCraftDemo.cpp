@@ -1,14 +1,15 @@
-#include <stdio.h>
+#include <cstdio>
 #include <string>
 #include <vector>
 #include <algorithm>
-#include <assert.h>
+#include <cassert>
 #include <chrono>
 #include <iostream>
 #include <ratio>
 #include <functional>
 
 #include "StopWatch.h"
+#include "TrieIndex.h"
 
 /**
     Represents a Record Object
@@ -58,11 +59,12 @@ using QBRecordCollection = std::vector<QBRecord>;
 
 //     return result;
 // }
-
+#include <unordered_map>
+using StringIndex = std::unordered_map<std::string, int>;
 
 
 template<typename LAMBDA>
-auto findByFunction(const QBRecordCollection & data, LAMBDA fn) 
+auto findRecords(const QBRecordCollection & data, LAMBDA fn) 
 {
     QBRecordCollection results;
 
@@ -78,19 +80,25 @@ auto findByFunction(const QBRecordCollection & data, LAMBDA fn)
     prefix - prefix for the string value for every record
     numRecords - number of records to populate in the collection
 */
+
 QBRecordCollection populateDummyData(const std::string & prefix, uint numRecords)
 {
+    auto column1Index = InMemoryIndex{};
+
     std::cout << "generating test data, prefix = '" << prefix << "', record count = " << numRecords << "\n";
     auto data = QBRecordCollection{};
     data.reserve(numRecords);
 
     for (auto i = 0u; i < numRecords; ++i) {
-        data.emplace_back(QBRecord{ 
+        auto record = QBRecord{ 
             i, 
             prefix + std::to_string(i), 
             i % 100, 
             std::to_string(i) + prefix 
-        });
+        };
+
+        column1Index.insert(record.column1.c_str(), i);
+        data.emplace_back(record);
     }
 
     std::cout << "finished generating test data\n";
@@ -99,34 +107,38 @@ QBRecordCollection populateDummyData(const std::string & prefix, uint numRecords
 
 auto findColumn0(const QBRecordCollection & data, uint value)
 {
-    return findByFunction(data, [value](const QBRecord & rec){
-        return rec.column0 == value;
-    });
+    assert(value < data.size());
+    QBRecordCollection results;
+
+    results.push_back(data[value]);
+    return results;
 }
 
 auto findColumn1(const QBRecordCollection & data, std::string_view value)
 {
-    return findByFunction(data, [value](const QBRecord & rec){
+    return findRecords(data, [value](const QBRecord & rec){
         return rec.column1.find(value) != std::string::npos;
     });
 }
 
 auto findColumn2(const QBRecordCollection & data, long value)
 {
-    return findByFunction(data, [value](const QBRecord & rec){
+    return findRecords(data, [value](const QBRecord & rec){
         return rec.column2 == value;
     });
 }
 
 auto findColumn3(const QBRecordCollection & data, std::string_view value)
 {
-    return findByFunction(data, [value](const QBRecord & rec){
+    return findRecords(data, [value](const QBRecord & rec){
         return rec.column3.find(value) != std::string::npos;
     });
 }
 
 bool validateFind(const QBRecordCollection & data)
 {
+    std::cout << "validating findRecord function\n";
+
     {
         auto name = "find string with findColumn0";
         auto found = findColumn0(data, 3465);
@@ -173,6 +185,8 @@ int main ()
     const uint RECORD_COUNT = 100'000;
     auto data = populateDummyData("testdata", RECORD_COUNT);
 
+    validateTrie();
+
     if (!validateFind(data)) {
         return 1;
     }
@@ -195,7 +209,7 @@ int main ()
     std::cout << "loop counts: " << LOOP_COUNT << "\n\n";
     
     std::cout << "total duration: " << std::fixed << stopWatch.seconds() << "s\n";
-    std::cout << "lookup duration: " << std::fixed << stopWatch.duration<std::chrono::microseconds>().count() / double(LOOP_COUNT) << "µs\n";
+    std::cout << "lookup duration: " << std::fixed << double(stopWatch.duration<std::chrono::microseconds>().count()) / double(LOOP_COUNT) << "µs\n";
     
     return 0;
 }
