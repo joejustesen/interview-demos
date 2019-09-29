@@ -1,12 +1,13 @@
-# Ideas
+## Ideas
 
 - Use google benchmark to for future testing
 - change from array of structures to struture of arrays
 - validate data access patterns, do we need to support partial string matches?
+- changes so far have been algorithmic, not focusing on implemenation details
 
-# Statistis
+## Statistics
 
-## Starting statistics
+### Starting statistics
 
 - size of record: 80 bytes
 - number of records: 100000
@@ -15,7 +16,7 @@
 - total duration: 8.454576s
 - lookup duration: 8454.576000µs
 
-## Seperate functions per lookup
+### Seperate functions per lookup
 
 - size of record: 80 bytes
 - number of records: 100000
@@ -24,7 +25,7 @@
 - total duration: 1.990278s
 - lookup duration: 1990.278000µs
 
-## Indexed statistics
+### Indexed statistics
 
 - size of record: 80 bytes
 - number of records: 100000
