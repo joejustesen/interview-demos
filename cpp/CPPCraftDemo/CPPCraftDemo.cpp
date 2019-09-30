@@ -65,7 +65,7 @@ using StringIndex = std::unordered_map<std::string, int>;
 
 
 template<typename LAMBDA>
-auto findRecords(const QBRecordCollection & data, LAMBDA fn) 
+auto findByFunction(const QBRecordCollection & data, LAMBDA fn) 
 {
     QBRecordCollection results;
 
@@ -79,7 +79,7 @@ auto findRecords(const QBRecordCollection & data, LAMBDA fn)
 /****************************************************************************
     Do a binary search on the sorted records by ID.
 ****************************************************************************/
-auto fastFind(const QBRecordCollection & data, unsigned int id)
+auto fastFindById(const QBRecordCollection & data, unsigned int id)
 {
     auto value = QBRecord{id, "", 0, "", false };
     auto it = std::lower_bound(std::begin(data), std::end(data), value);
@@ -95,7 +95,7 @@ auto fastFind(const QBRecordCollection & data, unsigned int id)
 /****************************************************************************
     Do a binary search on the sorted records by ID.
 ****************************************************************************/
-auto fastFind(QBRecordCollection& data, unsigned int id)
+auto fastFindById(QBRecordCollection& data, unsigned int id)
 {
     auto value = QBRecord{ id, "", 0, "", false };
     auto it = std::lower_bound(std::begin(data), std::end(data), value);
@@ -113,9 +113,9 @@ auto fastFind(QBRecordCollection& data, unsigned int id)
  *  Delete record by index id.
  *  Possible bad assumption here, id may not match 
 ****************************************************************************/
-bool DeleteRecordByID(QBRecordCollection& data, unsigned int id)
+bool deleteRecordByID(QBRecordCollection& data, unsigned int id)
 {
-    auto it = fastFind(data, id);
+    auto it = fastFindById(data, id);
 
     if (it != std::end(data)) {
         it->d_deleted = true;
@@ -193,7 +193,7 @@ auto indicesToRecords(const QBRecordCollection & data, const Indices & indices)
 auto findColumn0(const QBRecordCollection & data, unsigned int value)
 {
     auto results = QBRecordCollection{};
-    auto it = fastFind(data, value);
+    auto it = fastFindById(data, value);
 
     if (it != std::end(data) && !data[value].d_deleted) {
         results.push_back(data[value]);
@@ -211,7 +211,7 @@ auto findColumn1(const QBRecordCollection & data, std::string_view value, const 
         auto [found, indices] = index->search(std::string(value).c_str());
         return indicesToRecords(data, indices);
     } else {
-        return findRecords(data, [value](const QBRecord & rec){
+        return findByFunction(data, [value](const QBRecord & rec){
             return !rec.d_deleted && rec.d_column1.find(value) != std::string::npos;
         });
     }
@@ -222,7 +222,7 @@ auto findColumn1(const QBRecordCollection & data, std::string_view value, const 
 ****************************************************************************/
 auto findColumn2(const QBRecordCollection & data, long value)
 {
-    return findRecords(data, [value](const QBRecord & rec){
+    return findByFunction(data, [value](const QBRecord & rec){
         return !rec.d_deleted && rec.d_column2 == value;
     });
 }
@@ -232,7 +232,7 @@ auto findColumn2(const QBRecordCollection & data, long value)
 ****************************************************************************/
 auto findColumn3(const QBRecordCollection & data, std::string_view value)
 {
-    return findRecords(data, [value](const QBRecord & rec){
+    return findByFunction(data, [value](const QBRecord & rec){
         return !rec.d_deleted && rec.d_column3.find(value) != std::string::npos;
     });
 }
@@ -286,7 +286,7 @@ bool validateFind()
     }
 
     {
-        DeleteRecordByID(data, 50);
+        deleteRecordByID(data, 50);
 
         auto name = "find string with findColumn1";
         auto found = findColumn1(data, "testdata50", &index);
@@ -303,9 +303,8 @@ bool validateFind()
 
 /****************************************************************************
 ****************************************************************************/
-int main ()
+int main()
 {
-
     if (!validateTrie() || !validateFind()) {
         return 1;
     }
