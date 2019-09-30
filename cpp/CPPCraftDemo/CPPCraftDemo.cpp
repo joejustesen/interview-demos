@@ -196,7 +196,7 @@ auto findColumn0(const QBRecordCollection & data, unsigned int value)
     auto it = fastFindById(data, value);
 
     if (it != std::end(data) && !data[value].d_deleted) {
-        results.push_back(data[value]);
+        results.push_back(*it);
     }
 
     return results;
