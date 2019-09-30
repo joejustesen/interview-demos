@@ -11,11 +11,16 @@
     Represents a Record Object
 */
 struct QBRecord {
-    unsigned int    column0;			// unique id column
-    std::string column1;
-    long        column2;
-    std::string column3;
+    unsigned int    d_column0;			// unique id column
+    std::string     d_column1;
+    long            d_column2;
+    std::string     d_column3;
+    bool            d_deleted;
 };
+
+bool operator<(const QBRecord & lhs, const QBRecord & rhs) { 
+    return lhs.d_column0 < rhs.d_column0; 
+}
 
 /**
 Represents a Record Collections
@@ -37,17 +42,17 @@ using QBRecordCollection = std::vector<QBRecord>;
 
 //     std::copy_if(records.begin(), records.end(), std::back_inserter(result), [columnName, matchString](QBRecord rec) {
 		
-// 		if (columnName == "column0") {
+// 		if (columnName == "d_column0") {
 //             unsigned int matchValue = std::stoul (matchString);
-//             return matchValue == rec.column0;
-// 		} else if (columnName == "column1") {
-//             return rec.column1.find(matchString) != std::string::npos;
+//             return matchValue == rec.d_column0;
+// 		} else if (columnName == "d_column1") {
+//             return rec.d_column1.find(matchString) != std::string::npos;
             
-// 		} else if (columnName == "column2") {
+// 		} else if (columnName == "d_column2") {
 //             long matchValue = std::stol (matchString);
-//             return matchValue == rec.column2;
-// 		} else if (columnName == "column3"){
-//             return rec.column3.find (matchString) != std::string::npos;
+//             return matchValue == rec.d_column2;
+// 		} else if (columnName == "d_column3"){
+//             return rec.d_column3.find (matchString) != std::string::npos;
 // 		} else {
 //             return false;
 // 		}
@@ -71,16 +76,64 @@ auto findRecords(const QBRecordCollection & data, LAMBDA fn)
     return results;
 }
 
+/****************************************************************************
+    Do a binary search on the sorted records by ID.
+****************************************************************************/
+auto fastFind(const QBRecordCollection & data, unsigned int id)
+{
+    auto value = QBRecord{id, "", 0, "", false };
+    auto it = std::lower_bound(std::begin(data), std::end(data), value);
+  
+    if (it != std::end(data) && it->d_column0 == id) {
+        return it;
+    } else {
+        return std::end(data);
+    }
+}
+
 
 /****************************************************************************
- *  Generate an index for column1
+    Do a binary search on the sorted records by ID.
+****************************************************************************/
+auto fastFind(QBRecordCollection& data, unsigned int id)
+{
+    auto value = QBRecord{ id, "", 0, "", false };
+    auto it = std::lower_bound(std::begin(data), std::end(data), value);
+
+    if (it != std::end(data) && it->d_column0 == id) {
+        return it;
+    }
+    else {
+        return std::end(data);
+    }
+}
+
+
+/****************************************************************************
+ *  Delete record by index id.
+ *  Possible bad assumption here, id may not match 
+****************************************************************************/
+bool DeleteRecordByID(QBRecordCollection& data, unsigned int id)
+{
+    auto it = fastFind(data, id);
+
+    if (it != std::end(data)) {
+        it->d_deleted = true;
+        return true;
+    };
+
+    return false;
+}
+
+/****************************************************************************
+ *  Generate an index for d_column1
 ****************************************************************************/
 InMemoryIndex createIndex(const QBRecordCollection & data)
 {
     auto index = InMemoryIndex{};
 
     for (const auto & record : data) {
-        index.insert(record.column1.c_str(), record.column0);
+        index.insert(record.d_column1.c_str(), record.d_column0);
     }
 
     return index;
@@ -103,7 +156,8 @@ QBRecordCollection populateDummyData(const std::string & prefix, unsigned int nu
             i, 
             prefix + std::to_string(i), 
             i % 100, 
-            std::to_string(i) + prefix 
+            std::to_string(i) + prefix,
+            false
         };
 
         data.emplace_back(record);
@@ -125,18 +179,26 @@ auto indicesToRecords(const QBRecordCollection & data, const Indices & indices)
             return data[index];
         });
 
+    results.erase(std::remove_if(std::begin(results), std::end(results), 
+        [](const auto& rec) {
+            return rec.d_deleted;
+        }), 
+        std::end(results));
+
     return results;
 }
-
 
 /****************************************************************************
 ****************************************************************************/
 auto findColumn0(const QBRecordCollection & data, unsigned int value)
 {
-    assert(value < data.size());
-    QBRecordCollection results;
+    auto results = QBRecordCollection{};
+    auto it = fastFind(data, value);
 
-    results.push_back(data[value]);
+    if (it != std::end(data) && !data[value].d_deleted) {
+        results.push_back(data[value]);
+    }
+
     return results;
 }
 
@@ -150,7 +212,7 @@ auto findColumn1(const QBRecordCollection & data, std::string_view value, const 
         return indicesToRecords(data, indices);
     } else {
         return findRecords(data, [value](const QBRecord & rec){
-            return rec.column1.find(value) != std::string::npos;
+            return !rec.d_deleted && rec.d_column1.find(value) != std::string::npos;
         });
     }
 }
@@ -161,7 +223,7 @@ auto findColumn1(const QBRecordCollection & data, std::string_view value, const 
 auto findColumn2(const QBRecordCollection & data, long value)
 {
     return findRecords(data, [value](const QBRecord & rec){
-        return rec.column2 == value;
+        return !rec.d_deleted && rec.d_column2 == value;
     });
 }
 
@@ -171,7 +233,7 @@ auto findColumn2(const QBRecordCollection & data, long value)
 auto findColumn3(const QBRecordCollection & data, std::string_view value)
 {
     return findRecords(data, [value](const QBRecord & rec){
-        return rec.column3.find(value) != std::string::npos;
+        return !rec.d_deleted && rec.d_column3.find(value) != std::string::npos;
     });
 }
 
@@ -182,7 +244,8 @@ bool validateFind()
 {
     std::cout << "validating findRecord function\n";
 
-    const auto data = populateDummyData("testdata", 1000);
+    auto data = populateDummyData("testdata", 1000);
+    std::sort(std::begin(data), std::end(data));
     const auto index = createIndex(data);
     
     {
@@ -222,6 +285,18 @@ bool validateFind()
         }
     }
 
+    {
+        DeleteRecordByID(data, 50);
+
+        auto name = "find string with findColumn1";
+        auto found = findColumn1(data, "testdata50", &index);
+
+        if (found.size() != 10) {
+            std::cerr << "validation failed 4: " << name << " expected '10' record, found '" << found.size() << "' records\n";
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -236,7 +311,8 @@ int main ()
     }
 
     const unsigned int RECORD_COUNT = 100'000;
-    const auto data = populateDummyData("testdata", RECORD_COUNT);
+    auto data = populateDummyData("testdata", RECORD_COUNT);
+    std::sort(std::begin(data), std::end(data));
     const auto index = createIndex(data);
 
     std::cout << "starting performance test\n";
