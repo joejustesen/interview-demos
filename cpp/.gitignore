@@ -8,3 +8,6 @@ x64
 ipch
 *.user
 demo
+.vs/
+Debug/
+Release/

@@ -7,6 +7,9 @@
 
 ## Statistics
 
+All statistics generated on Linux Ubuntu 19.04
+AMD 2400G with 32GB RAM
+
 ### Starting statistics
 
 - size of record: 80 bytes

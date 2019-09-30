@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "InMemoryIndex.h"
 #include <stack>
 #include <algorithm>
@@ -21,7 +22,7 @@ InMemoryIndex::InMemoryIndex(InMemoryIndex && other) : d_head{std::move(other.d_
 /****************************************************************************
  * Insert a string into the Trie
 ****************************************************************************/
-void InMemoryIndex::insert(const char * str, uint index)
+void InMemoryIndex::insert(const char * str, unsigned int index)
 {
 	Trie * ptr = d_head.get();
 	

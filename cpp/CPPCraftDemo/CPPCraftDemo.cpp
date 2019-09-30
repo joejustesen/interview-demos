@@ -1,10 +1,6 @@
-#include <cstdio>
-#include <string>
+#include "stdafx.h"
 #include <vector>
-#include <algorithm>
-#include <cassert>
 #include <chrono>
-#include <iostream>
 #include <ratio>
 #include <functional>
 
@@ -15,7 +11,7 @@
     Represents a Record Object
 */
 struct QBRecord {
-    uint        column0;			// unique id column
+    unsigned int    column0;			// unique id column
     std::string column1;
     long        column2;
     std::string column3;
@@ -42,7 +38,7 @@ using QBRecordCollection = std::vector<QBRecord>;
 //     std::copy_if(records.begin(), records.end(), std::back_inserter(result), [columnName, matchString](QBRecord rec) {
 		
 // 		if (columnName == "column0") {
-//             uint matchValue = std::stoul (matchString);
+//             unsigned int matchValue = std::stoul (matchString);
 //             return matchValue == rec.column0;
 // 		} else if (columnName == "column1") {
 //             return rec.column1.find(matchString) != std::string::npos;
@@ -96,7 +92,7 @@ InMemoryIndex createIndex(const QBRecordCollection & data)
  *  prefix: prefix for the string value for every record
  *  numRecords: number of records to populate in the collection
 ****************************************************************************/
-QBRecordCollection populateDummyData(const std::string & prefix, uint numRecords)
+QBRecordCollection populateDummyData(const std::string & prefix, unsigned int numRecords)
 {
     std::cout << "generating test data, prefix = '" << prefix << "', record count = " << numRecords << "\n";
     auto data = QBRecordCollection{};
@@ -135,7 +131,7 @@ auto indicesToRecords(const QBRecordCollection & data, const Indices & indices)
 
 /****************************************************************************
 ****************************************************************************/
-auto findColumn0(const QBRecordCollection & data, uint value)
+auto findColumn0(const QBRecordCollection & data, unsigned int value)
 {
     assert(value < data.size());
     QBRecordCollection results;
@@ -234,7 +230,7 @@ int main ()
 {
     validateTrie();
 
-    const uint RECORD_COUNT = 100'000;
+    const unsigned int RECORD_COUNT = 100'000;
     const auto data = populateDummyData("testdata", RECORD_COUNT);
     const auto index = createIndex(data);
 
