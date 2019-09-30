@@ -178,25 +178,28 @@ auto findColumn3(const QBRecordCollection & data, std::string_view value)
 
 /****************************************************************************
 ****************************************************************************/
-bool validateFind(const QBRecordCollection & data, const InMemoryIndex & index)
+bool validateFind()
 {
     std::cout << "validating findRecord function\n";
 
+    const auto data = populateDummyData("testdata", 1000);
+    const auto index = createIndex(data);
+    
     {
         auto name = "find string with findColumn0";
-        auto found = findColumn0(data, 3465);
+        auto found = findColumn0(data, 346);
 
         if (found.size() != 1) {
-            std::cerr << "validation failed: " << name << " expected '1' record, found '" << found.size() << "' records\n";
+            std::cerr << "validation failed 0: " << name << " expected '1' record, found '" << found.size() << "' records\n";
             return false;
         }
     }
     {
         auto name = "find string with findColumn1";
-        auto found = findColumn1(data, "testdata500", &index);
+        auto found = findColumn1(data, "testdata50", &index);
 
-        if (found.size() != 111) {
-            std::cerr << "validation failed: " << name << " expected '111' record, found '" << found.size() << "' records\n";
+        if (found.size() != 11) {
+            std::cerr << "validation failed 1: " << name << " expected '11' record, found '" << found.size() << "' records\n";
             return false;
         }
     }
@@ -204,8 +207,8 @@ bool validateFind(const QBRecordCollection & data, const InMemoryIndex & index)
         auto name = "find number with findColumn2";
         auto found = findColumn2(data, 24);
 
-        if (found.size() != 1000) {
-            std::cerr << "validation failed: " << name << " expected '1,000' record, found '" << found.size() << "' records\n";
+        if (found.size() != 10) {
+            std::cerr << "validation failed 2: " << name << " expected '10' record, found '" << found.size() << "' records\n";
             return false;
         }
     }
@@ -213,8 +216,8 @@ bool validateFind(const QBRecordCollection & data, const InMemoryIndex & index)
         auto name = "find string with findColumn3";
         auto found = findColumn3(data, "500testdata");
 
-        if (found.size() != 100) {
-            std::cerr << "validation failed: " << name << " expected '100' record, found '" << found.size() << "' records\n";
+        if (found.size() != 1) {
+            std::cerr << "validation failed 3: " << name << " expected '1' record, found '" << found.size() << "' records\n";
             return false;
         }
     }
@@ -227,15 +230,14 @@ bool validateFind(const QBRecordCollection & data, const InMemoryIndex & index)
 ****************************************************************************/
 int main ()
 {
-    validateTrie();
+
+    if (!validateTrie() || !validateFind()) {
+        return 1;
+    }
 
     const unsigned int RECORD_COUNT = 100'000;
     const auto data = populateDummyData("testdata", RECORD_COUNT);
     const auto index = createIndex(data);
-
-    if (!validateFind(data, index)) {
-        return 1;
-    }
 
     std::cout << "starting performance test\n";
     const int LOOP_COUNT = 1000;

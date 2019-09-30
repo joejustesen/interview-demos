@@ -28,4 +28,4 @@ public:
     std::tuple<bool, Indices> search(const char * str) const;
 };
 
-void validateTrie(); 
+bool validateTrie(); 

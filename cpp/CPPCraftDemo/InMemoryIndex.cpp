@@ -116,7 +116,7 @@ std::tuple<bool, Indices> InMemoryIndex::search(const char* str) const
 /****************************************************************************
  * unit test Trie
 ****************************************************************************/
-void validateTrie()
+bool validateTrie()
 {
     std::cout << "validating Trie functions\n";
     
@@ -132,6 +132,7 @@ void validateTrie()
 
         if (found || results.size() != 0) {
             std::cout << "failure not-found\n";
+            return false;
         }
     }
     {
@@ -139,6 +140,7 @@ void validateTrie()
 
         if (!found || results.size() != 1 || results[0] != 34u) {
             std::cout << "failure 34\n";
+            return false;
         }
     }
     {
@@ -146,6 +148,7 @@ void validateTrie()
 
         if (!found || results.size() != 1 || results[0] != 583u) {
             std::cout << "failure 34\n";
+            return false;
         }
     }
     {
@@ -153,16 +156,22 @@ void validateTrie()
 
         if (!found || results.size() != 3) {
             std::cout << "failure test\n";
+            return false;
         }
 
         if (std::find(std::begin(results), std::end(results), 34u) == results.end()) {
             std::cout << "failure test\n";
+            return false;
         }
         if (std::find(std::begin(results), std::end(results), 583u) == results.end()) {
             std::cout << "failure test\n";
+            return false;
         }
         if (std::find(std::begin(results), std::end(results), 349u) == results.end()) {
             std::cout << "failure test\n";
+            return false;
         }
     }
+
+    return true;
 }
