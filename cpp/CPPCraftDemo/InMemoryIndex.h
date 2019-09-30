@@ -20,6 +20,9 @@ class InMemoryIndex {
 public:
     InMemoryIndex();
     InMemoryIndex(InMemoryIndex && other);
+    InMemoryIndex(const InMemoryIndex& other) = delete; 
+
+    InMemoryIndex & operator=(const InMemoryIndex& other) = delete;
 
     void insert(const char * str, unsigned int index);
     std::tuple<bool, Indices> search(const char * str) const;

@@ -219,8 +219,7 @@ bool validateFind(const QBRecordCollection & data, const InMemoryIndex & index)
         }
     }
 
-    return true;    validateTrie();
-
+    return true;
 }
 
 

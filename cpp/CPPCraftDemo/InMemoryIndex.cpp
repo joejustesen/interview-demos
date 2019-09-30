@@ -62,7 +62,7 @@ void pushLeavesOntoStack(const M & map, S & stack, FN fn) {
 Indices InMemoryIndex::allLeaves(Trie * ptr) const
 {
     auto indices = Indices{};
-    auto nodes = std::stack<Trie *, std::vector<Trie *>>{};
+    auto nodes = std::stack<Trie *>{};
 
     if (!ptr) {
         return indices;
