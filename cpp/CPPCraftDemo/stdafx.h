@@ -5,19 +5,20 @@
 
 #pragma once
 
+#ifdef _WIN32
 #include "targetver.h"
+#include <tchar.h>
+#endif
 
 #include <cstdio>
+#include <cassert>
+#include <cstdint>
+
 #include <string>
 #include <iostream>
 #include <algorithm>
-#include <cassert>
 #include <memory>
 #include <string_view>
-#include <cstdint>
-#include <tchar.h>
-
-
 
 
 // TODO: reference additional headers your program requires here

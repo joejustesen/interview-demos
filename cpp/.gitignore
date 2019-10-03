@@ -11,3 +11,9 @@ demo
 .vs/
 Debug/
 Release/
+
+
+Makefile
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
