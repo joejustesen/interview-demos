@@ -49,6 +49,7 @@ void extractValues(const T & from, C & to) {
 template<typename M, typename S, typename FN>
 void pushLeavesOntoStack(const M & map, S & stack, FN fn) {
     for (auto const & [first, second] : map) {
+        UNUSED_VAR(first);
         stack.push(fn(second));
     }
 }

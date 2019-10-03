@@ -208,8 +208,10 @@ auto findColumn0(const QBRecordCollection & data, unsigned int value)
 auto findColumn1(const QBRecordCollection & data, std::string_view value, const InMemoryIndex * index = nullptr)
 {
     if (index) {
-        auto [found, indices] = index->search(std::string(value).c_str());
+        auto [found, indices] = index->search(value);
+        UNUSED_VAR(found);
         return indicesToRecords(data, indices);
+
     } else {
         return findByFunction(data, [value](const QBRecord & rec){
             return !rec.d_deleted && rec.d_column1.find(value) != std::string::npos;

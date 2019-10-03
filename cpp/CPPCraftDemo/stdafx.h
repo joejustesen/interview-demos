@@ -20,5 +20,7 @@
 #include <memory>
 #include <string_view>
 
+#define UNUSED_VAR(var)         (void)(var)
+
 
 // TODO: reference additional headers your program requires here
