@@ -22,22 +22,21 @@ InMemoryIndex::InMemoryIndex(InMemoryIndex && other) : d_head{std::move(other.d_
 /****************************************************************************
  * Insert a string into the Trie
 ****************************************************************************/
-void InMemoryIndex::insert(const char * str, unsigned int index)
+void InMemoryIndex::insert(const std::string & str, unsigned int index)
 {
 	Trie * ptr = d_head.get();
 	
-    while (*str) {
-        auto ch = *str;
+    for (auto it = std::cbegin(str); it != std::cend(str); ++it) {
+        auto ch = *it;
 
         if (ptr->d_leaves.find(ch) == ptr->d_leaves.end()) {
             ptr->d_leaves[ch] = std::make_unique<Trie>();
         }
 
         ptr = ptr->d_leaves[ch].get();
-		++str;
 	}
 
-    ptr->d_index[str] = index;
+    ptr->d_index[std::string(str)] = index;
 }
 
 template<typename T, typename C>
@@ -90,18 +89,16 @@ Indices InMemoryIndex::allLeaves(Trie * ptr) const
 /****************************************************************************
  * Return a list of indies that match the string.
 ****************************************************************************/
-std::tuple<bool, Indices> InMemoryIndex::search(const char* str) const
+std::tuple<bool, Indices> InMemoryIndex::search(std::string_view str) const
 {
 	Trie * ptr = d_head.get();
 
-	while (*str) {
-        auto ch = *str;
+    for (auto it = std::cbegin(str); it != std::cend(str); ++it) {
+        auto ch = *it;
     
 		ptr = ptr->d_leaves[ch].get();
 		if (ptr == nullptr)
 			return std::make_tuple(false, Indices{});
-
-		++str;
 	}
 	
     if (ptr->d_index.empty() && ptr->d_leaves.empty()) {

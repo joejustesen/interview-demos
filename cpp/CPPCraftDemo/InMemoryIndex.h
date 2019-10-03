@@ -24,8 +24,8 @@ public:
 
     InMemoryIndex & operator=(const InMemoryIndex& other) = delete;
 
-    void insert(const char * str, unsigned int index);
-    std::tuple<bool, Indices> search(const char * str) const;
+    void insert(const std::string & str, unsigned int index);
+    std::tuple<bool, Indices> search(std::string_view str) const;
 };
 
 bool validateTrie(); 
