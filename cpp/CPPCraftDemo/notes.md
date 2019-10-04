@@ -54,3 +54,12 @@ AMD 2400G with 32GB RAM
 - loop counts: 1000
 - total duration: 0.376851s
 - lookup duration: 376.851000µs
+
+### Use string_view for unordered_map in Index
+
+- size of record: 56 bytes
+- number of records: 100000
+- size of collection: 5600000 bytes
+- loop counts: 1000
+- total duration: 0.341057s
+- lookup duration: 341.057000µs

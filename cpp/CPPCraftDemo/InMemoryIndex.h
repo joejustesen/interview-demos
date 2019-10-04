@@ -8,7 +8,7 @@ using Indices = std::vector<unsigned int>;
 class InMemoryIndex {
     struct Trie {
         using Leaves = std::unordered_map<char, std::unique_ptr<Trie>>;
-        using Index = std::unordered_map<std::string, unsigned int>;
+        using Index = std::unordered_map<std::string_view, unsigned int>;
 
         Leaves  d_leaves;
         Index   d_index;
@@ -24,8 +24,8 @@ public:
 
     InMemoryIndex & operator=(const InMemoryIndex& other) = delete;
 
-    void insert(const std::string & str, unsigned int index);
-    std::tuple<bool, Indices> search(std::string_view str) const;
+    void insert(const std::string_view str, unsigned int index);
+    std::tuple<bool, Indices> search(const std::string_view str) const;
 };
 
 bool validateTrie(); 

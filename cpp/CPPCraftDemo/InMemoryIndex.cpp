@@ -22,7 +22,7 @@ InMemoryIndex::InMemoryIndex(InMemoryIndex && other) : d_head{std::move(other.d_
 /****************************************************************************
  * Insert a string into the Trie
 ****************************************************************************/
-void InMemoryIndex::insert(const std::string & str, unsigned int index)
+void InMemoryIndex::insert(const std::string_view str, unsigned int index)
 {
 	Trie * ptr = d_head.get();
 	
@@ -88,7 +88,7 @@ Indices InMemoryIndex::allLeaves(Trie * ptr) const
 /****************************************************************************
  * Return a list of indies that match the string.
 ****************************************************************************/
-std::tuple<bool, Indices> InMemoryIndex::search(std::string_view str) const
+std::tuple<bool, Indices> InMemoryIndex::search(const std::string_view str) const
 {
 	Trie * ptr = d_head.get();
 
