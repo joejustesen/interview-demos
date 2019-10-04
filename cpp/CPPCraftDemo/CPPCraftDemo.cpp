@@ -128,18 +128,14 @@ QBRecordCollection populateDummyData(const std::string & prefix, unsigned int nu
 ****************************************************************************/
 auto indicesToRecords(const QBRecordCollection & data, const Indices & indices)
 {
-    QBRecordCollection results;
+    auto results = QBRecordCollection{};
 
-    std::transform(std::begin(indices), std::end(indices), std::back_inserter(results), 
-        [&data](auto index) {
-            return data[index];
-        });
-
-    results.erase(std::remove_if(std::begin(results), std::end(results), 
-        [](const auto& rec) {
-            return rec.d_deleted;
-        }), 
-        std::end(results));
+    for (auto idx : indices) {
+        auto & record = data[idx];
+        if (!record.d_deleted) {
+            results.push_back(record);
+        }
+    }
 
     return results;
 }
