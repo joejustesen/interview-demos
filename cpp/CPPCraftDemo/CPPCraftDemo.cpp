@@ -3,13 +3,12 @@
 #include <chrono>
 #include <ratio>
 #include <functional>
+#include <unordered_map>
 
 #include "StopWatch.h"
 #include "InMemoryIndex.h"
 
-/**
-    Represents a Record Object
-*/
+
 struct QBRecord {
     unsigned int    d_column0;			// unique id column
     std::string     d_column1;
@@ -22,45 +21,7 @@ bool operator<(const QBRecord & lhs, const QBRecord & rhs) {
     return lhs.d_column0 < rhs.d_column0; 
 }
 
-/**
-Represents a Record Collections
-*/
 using QBRecordCollection = std::vector<QBRecord>;
-
-/**
-    Return records that contains a string in the StringValue field
-    records - the initial set of records to filter
-    matchString - the string to search for
-*/
-
-// QBRecordCollection QBFindMatchingRecords (
-//     const QBRecordCollection & records,
-// 	const std::string & columnName,
-// 	const std::string & matchString)
-// {
-//     QBRecordCollection result;
-
-//     std::copy_if(records.begin(), records.end(), std::back_inserter(result), [columnName, matchString](QBRecord rec) {
-		
-// 		if (columnName == "d_column0") {
-//             unsigned int matchValue = std::stoul (matchString);
-//             return matchValue == rec.d_column0;
-// 		} else if (columnName == "d_column1") {
-//             return rec.d_column1.find(matchString) != std::string::npos;
-            
-// 		} else if (columnName == "d_column2") {
-//             long matchValue = std::stol (matchString);
-//             return matchValue == rec.d_column2;
-// 		} else if (columnName == "d_column3"){
-//             return rec.d_column3.find (matchString) != std::string::npos;
-// 		} else {
-//             return false;
-// 		}
-//     });
-
-//     return result;
-// }
-#include <unordered_map>
 using StringIndex = std::unordered_map<std::string, int>;
 
 
