@@ -26,9 +26,7 @@ void InMemoryIndex::insert(const std::string & str, unsigned int index)
 {
 	Trie * ptr = d_head.get();
 	
-    for (auto it = std::cbegin(str); it != std::cend(str); ++it) {
-        auto ch = *it;
-
+    for (auto ch : str) {
         if (ptr->d_leaves.find(ch) == ptr->d_leaves.end()) {
             ptr->d_leaves[ch] = std::make_unique<Trie>();
         }
@@ -94,9 +92,7 @@ std::tuple<bool, Indices> InMemoryIndex::search(std::string_view str) const
 {
 	Trie * ptr = d_head.get();
 
-    for (auto it = std::cbegin(str); it != std::cend(str); ++it) {
-        auto ch = *it;
-    
+    for (auto ch : str) {
 		ptr = ptr->d_leaves[ch].get();
 		if (ptr == nullptr)
 			return std::make_tuple(false, Indices{});

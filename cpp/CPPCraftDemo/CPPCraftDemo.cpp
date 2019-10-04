@@ -209,8 +209,11 @@ auto findColumn1(const QBRecordCollection & data, std::string_view value, const 
 {
     if (index) {
         auto [found, indices] = index->search(value);
-        UNUSED_VAR(found);
-        return indicesToRecords(data, indices);
+        if (!found) {
+            return QBRecordCollection{};
+        } else {
+            return indicesToRecords(data, indices);
+        }
 
     } else {
         return findByFunction(data, [value](const QBRecord & rec){
