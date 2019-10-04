@@ -36,7 +36,7 @@ void InMemoryIndex::insert(const std::string & str, unsigned int index)
         ptr = ptr->d_leaves[ch].get();
 	}
 
-    ptr->d_index[std::string(str)] = index;
+    ptr->d_index[str] = index;
 }
 
 template<typename T, typename C>
