@@ -91,10 +91,6 @@ auto fastFindById(const QBRecordCollection & data, unsigned int id)
     }
 }
 
-
-/****************************************************************************
-    Do a binary search on the sorted records by ID.
-****************************************************************************/
 auto fastFindById(QBRecordCollection & data, unsigned int id)
 {
     auto it = fastFindById(static_cast<const QBRecordCollection &>(data), id);
