@@ -83,7 +83,7 @@ auto fastFindById(const QBRecordCollection & data, unsigned int id)
 {
     auto value = QBRecord{id, "", 0, "", false };
     auto it = std::lower_bound(std::begin(data), std::end(data), value);
-  
+
     if (it != std::end(data) && it->d_column0 == id) {
         return it;
     } else {
@@ -95,17 +95,10 @@ auto fastFindById(const QBRecordCollection & data, unsigned int id)
 /****************************************************************************
     Do a binary search on the sorted records by ID.
 ****************************************************************************/
-auto fastFindById(QBRecordCollection& data, unsigned int id)
+auto fastFindById(QBRecordCollection & data, unsigned int id)
 {
-    auto value = QBRecord{ id, "", 0, "", false };
-    auto it = std::lower_bound(std::begin(data), std::end(data), value);
-
-    if (it != std::end(data) && it->d_column0 == id) {
-        return it;
-    }
-    else {
-        return std::end(data);
-    }
+    auto it = fastFindById(static_cast<const QBRecordCollection &>(data), id);
+    return data.erase(it, it);  // null erase to convert const_iterator to an iterator
 }
 
 
