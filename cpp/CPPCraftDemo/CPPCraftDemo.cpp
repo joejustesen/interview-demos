@@ -11,9 +11,9 @@
 
 struct QBRecord {
     unsigned int    d_column0;			// unique id column
-    std::string     d_column1;
+    char            d_column1[16];
     long            d_column2;
-    std::string     d_column3;
+    char            d_column3[16];
     bool            d_deleted;
 };
 
@@ -81,9 +81,10 @@ bool deleteRecordByID(QBRecordCollection& data, unsigned int id)
 InMemoryIndex createIndex(const QBRecordCollection & data)
 {
     auto index = InMemoryIndex{};
+    auto counter = 0;
 
     for (const auto & record : data) {
-        index.insert(record.d_column1.c_str(), record.d_column0);
+        index.insert(record.d_column1, counter++);
     }
 
     return index;
@@ -102,15 +103,20 @@ QBRecordCollection populateDummyData(const std::string & prefix, unsigned int nu
     data.reserve(numRecords);
 
     for (auto i = 0u; i < numRecords; ++i) {
-        auto record = QBRecord{ 
-            i, 
-            prefix + std::to_string(i), 
-            i % 100, 
-            std::to_string(i) + prefix,
-            false
-        };
+        auto col1 = prefix + std::to_string(i);
+        auto col3 = std::to_string(i) + prefix;
+        auto record = QBRecord{ i, "",  i % 100, "", false };
 
-        data.emplace_back(record);
+        if (col1.length() >= std::size(record.d_column1)) {
+            throw std::length_error("length of column1 data exceeds buffer size");
+        }
+        if (col3.length() >= std::size(record.d_column3)) {
+            throw std::length_error("length of column3 data exceeds buffer size");
+        }
+        std::copy(std::begin(col1), std::end(col1), std::begin(record.d_column1));
+        std::copy(std::begin(col3), std::end(col3), std::begin(record.d_column3));
+
+        data.push_back(record);
     }
 
     std::cout << "finished generating test data\n";
@@ -167,7 +173,7 @@ auto findColumn1(const QBRecordCollection & data, std::string_view value, const 
 
     } else {
         return findByFunction(data, [value](const QBRecord & rec){
-            return !rec.d_deleted && rec.d_column1.find(value) != std::string::npos;
+            return !rec.d_deleted && std::string_view(rec.d_column1).find(value) != std::string::npos;
         });
     }
 }
@@ -188,7 +194,7 @@ auto findColumn2(const QBRecordCollection & data, long value)
 auto findColumn3(const QBRecordCollection & data, std::string_view value)
 {
     return findByFunction(data, [value](const QBRecord & rec){
-        return !rec.d_deleted && rec.d_column3.find(value) != std::string::npos;
+        return !rec.d_deleted && std::string_view(rec.d_column3).find(value) != std::string::npos;
     });
 }
 
